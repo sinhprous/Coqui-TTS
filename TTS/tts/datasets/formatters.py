@@ -281,6 +281,30 @@ def common_voice(root_path, meta_file, ignored_speakers=None):
     return items
 
 
+def common_voice_2(root_path, meta_file, ignored_speakers=None):
+    """Normalize the common voice meta data file to TTS format."""
+    txt_file = os.path.join(root_path, meta_file)
+    items = []
+    with open(txt_file, "r", encoding="utf-8") as ttf:
+        for line in ttf:
+            if line.startswith("client_id"):
+                continue
+            cols = line.split("\t")
+            text = cols[2]
+            speaker_name = cols[0]
+            # ignore speakers
+            if isinstance(ignored_speakers, list):
+                if speaker_name in ignored_speakers:
+                    continue
+            wav_file = os.path.join(root_path, "clips", cols[1])
+            if not os.path.exists(wav_file):
+              continue
+            items.append(
+                {"text": text, "audio_file": wav_file, "speaker_name": "MCV_" + speaker_name, "root_path": root_path, "language": "en"}
+            )
+    return items
+
+
 def libri_tts(root_path, meta_files=None, ignored_speakers=None):
     """https://ai.google/tools/datasets/libri-tts/"""
     items = []
